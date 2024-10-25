@@ -1,10 +1,12 @@
 # Dockerfile para laravel_app
 
 # Imagem base do PHP com FPM
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /var/www
+
+RUN usermod -u 1000 www-data
 
 # Instala dependências necessárias
 RUN apt-get update && apt-get install -y \
@@ -38,8 +40,8 @@ RUN chown -R www-data:www-data /var/www
 # Usuário atual passa a ser www-data
 USER www-data
 
-# Expor a porta 9000 para o PHP-FPM
-EXPOSE 9000
+# Expor a porta 9003 para o PHP-FPM
+EXPOSE 9003
 
 # Comando padrão para iniciar o servidor PHP-FPM
 CMD ["php-fpm"]

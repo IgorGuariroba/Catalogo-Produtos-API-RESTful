@@ -14,8 +14,8 @@ services:
       # Certifique-se de que todas as configurações necessárias estão incluídas no local.ini para evitar erros de runtime
       - ./infrastructure/php/local.ini:/usr/local/etc/php/conf.d/local.ini:ro
     ports:
-      # Expõe a porta 9000 no host e a mapeia para a porta 9000 no container
-      - "9000:9000"
+      # Expõe a porta 9003 no host e a mapeia para a porta 9000 no container
+      - "9003:9003"
     networks:
       - app-network  # Conecta o serviço app à rede personalizada app-network
     environment:
