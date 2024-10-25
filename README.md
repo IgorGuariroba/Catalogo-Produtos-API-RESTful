@@ -25,7 +25,7 @@ Este projeto tem como objetivo criar um sistema de gerenciamento de produtos que
 
 1. **Clone o repositório**:
    ```sh
-   git clone https://github.com/seu-usuario/catalogo-produtos-api.git
+   git clone git@github.com:IgorGuariroba/Catalogo-Produtos-API-RESTful.git
    ```
 
 2. **Instale as dependências**:
