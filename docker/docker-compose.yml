@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: app_container
+    ports:
+      - "9000:9000"  # Porta 9000 do container PHP-FPM mapeada para a 9000 local
+    volumes:
+      - ../src:/var/www/html  # Montar o código fonte para desenvolvimento
+    env_file:
+      - ../.env
+    depends_on:
+      - db
+      - redis
+
+  webserver:
+    image: nginx:alpine
+    container_name: nginx_container
+    ports:
+      - "80:80"
+    volumes:
+      - ../src:/var/www/html
+      - ./server/nginx.conf:/etc/nginx/nginx.conf # Montar o arquivo nginx.conf principal
+      - ./server/default.conf:/etc/nginx/conf.d/default.conf # Montar o arquivo de configuração do servidor
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: db_container
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+    volumes:
+      - ./volumes/db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"  # Porta padrão do MySQL
+
+  redis:
+    image: redis:alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"  # Porta do Redis para cache e filas
+
+  node:
+    image: node:18-alpine
+    container_name: node_container
+    volumes:
+      - ../src:/var/www/html
+    working_dir: /var/www/html
+    command: [ "tail", "-f", "/dev/null" ]  # Contêiner permanece em execução
+    depends_on:
+      - app
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog_container
+    ports:
+      - "8025:8025"  # Interface web para visualizar e-mails
