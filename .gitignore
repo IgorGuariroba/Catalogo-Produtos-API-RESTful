@@ -48,3 +48,9 @@ src/.fleet
 src/.idea
 src/.vscode
 src/.zed
+# Ignorar dados do banco de dados
+docker/volumes/db_data/
+
+# Ignorar arquivos de log e cache
+storage/logs/
+storage/framework/cache/
