@@ -5,12 +5,43 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Storage;
 
+/**
+ * @OA\Tag(
+ *     name="Serviços",
+ *     description="API Endpoints para Verificação de Status dos Serviços"
+ * )
+ */
 class HealthCheckController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/status",
+     *     tags={"Serviços"},
+     *     summary="consultar status dos serviços",
+     *     description="Este endpoint verifica o status de conexão dos principais serviços da aplicação: banco de dados, cache e fila.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Status dos serviços",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="string", example="OK", description="Status geral da aplicação"),
+     *             @OA\Property(
+     *                 property="services",
+     *                 type="object",
+     *                 @OA\Property(property="database", type="string", example="Connected", description="Status da conexão com o banco de dados"),
+     *                  @OA\Property(property="cache", type="string", example="Connected", description="Status da conexão com o serviço de cache"),
+     *                  @OA\Property(property="queue", type="string", example="Connected", description="Status da conexão com o serviço de filas")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *     response=500,
+     *     description="Erro interno no servidor"
+     *    )
+     * )
+     */
     public function check(DB $db): JsonResponse
     {
         try {
@@ -34,28 +65,12 @@ class HealthCheckController extends Controller
             $queueStatus = 'Not Connected : ' . $e->getMessage();
         }
 
-//        try {
-//            Http::get('https://external-service.com/health');
-//            $externalServiceStatus = 'Connected';
-//        } catch (\Exception $e) {
-//            $externalServiceStatus = 'Not Connected : ' . $e->getMessage();
-//        }  @D$¨SG%ryubv
-//
-//        try {
-//            Storage::disk('s3')->exists('health_check');
-//            $storageStatus = 'Connected';
-//        } catch (\Exception $e) {
-//            $storageStatus = 'Not Connected : ' . $e->getMessage();
-//        }
-
         return response()->json([
             'status' => 'OK',
             'services' => [
                 'database' => $databaseStatus,
                 'cache' => $cacheStatus,
                 'queue' => $queueStatus,
-//                'external_service' => $externalServiceStatus,
-//                'storage' => $storageStatus,
             ]
         ]);
     }
