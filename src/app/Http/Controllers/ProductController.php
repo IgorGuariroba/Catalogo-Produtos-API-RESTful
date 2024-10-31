@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductListRequest;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -62,34 +64,138 @@ use Illuminate\Http\Request;
  */
 class ProductController extends Controller
 {
-    /**
-     * @OA\Get(
-     *     path="/products",
-     *     operationId="getProducts",
-     *     tags={"Products"},
-     *     summary="Retorna a lista de produtos",
-     *     description="Retorna todos os produtos disponíveis no sistema",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Lista de produtos retornada com sucesso",
-     *         @OA\JsonContent(
-     *             type="array",
-     *             @OA\Items(ref="#/components/schemas/Product")
-     *         )
-     *     )
-     * )
-     */
-    public function index(Product $product): JsonResponse
+/**
+ * @OA\Get(
+ *     path="/products",
+ *     operationId="getProducts",
+ *     tags={"Products"},
+ *     summary="Lista os produtos",
+ *     description="Lista os produtos disponíveis, com suporte a paginação, ordenação, direção de ordenação e links HATEOAS para cada produto.",
+ *     @OA\Parameter(
+ *         name="page",
+ *         in="query",
+ *         required=false,
+ *         description="Número da página para paginação",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\Parameter(
+ *         name="per_page",
+ *         in="query",
+ *         required=false,
+ *         description="Número de itens por página para paginação",
+ *         @OA\Schema(type="integer", example=10)
+ *     ),
+ *     @OA\Parameter(
+ *         name="sort",
+ *         in="query",
+ *         required=false,
+ *         description="Campo pelo qual os produtos devem ser ordenados",
+ *         @OA\Schema(type="string", example="id")
+ *     ),
+ *     @OA\Parameter(
+ *         name="direction",
+ *         in="query",
+ *         required=false,
+ *         description="Direção da ordenação: asc para ascendente e desc para descendente",
+ *         @OA\Schema(type="string", enum={"asc", "desc"}, example="asc")
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Lista de produtos retornada com sucesso",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="data", type="array",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="id", type="integer", example=1),
+ *                     @OA\Property(property="name", type="string", example="Produto A"),
+ *                     @OA\Property(property="price", type="number", format="float", example=99.99),
+ *                     @OA\Property(property="description", type="string", example="Descrição do produto A"),
+ *                     @OA\Property(property="stock", type="integer", example=100),
+ *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-10-31T19:06:33.624Z"),
+ *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-10-31T19:06:33.624Z"),
+ *                     @OA\Property(property="links", type="array",
+ *                         description="Links HATEOAS para o produto",
+ *                         @OA\Items(
+ *                             type="object",
+ *                             @OA\Property(property="rel", type="string", example="self"),
+ *                             @OA\Property(property="href", type="string", example="http://catalogo-produtos.local/api/products/1")
+ *                         )
+ *                     )
+ *                 )
+ *             ),
+ *             @OA\Property(property="links", type="object",
+ *                 @OA\Property(property="first", type="string", example="http://catalogo-produtos.local/products?page=1"),
+ *                 @OA\Property(property="last", type="string", example="http://catalogo-produtos.local/products?page=10"),
+ *                 @OA\Property(property="prev", type="string", nullable=true, example="http://catalogo-produtos.local/products?page=1"),
+ *                 @OA\Property(property="next", type="string", nullable=true, example="http://catalogo-produtos.local/products?page=3")
+ *             ),
+ *             @OA\Property(property="meta", type="object",
+ *                 @OA\Property(property="current_page", type="integer", example=2),
+ *                 @OA\Property(property="from", type="integer", example=11),
+ *                 @OA\Property(property="last_page", type="integer", example=10),
+ *                 @OA\Property(property="path", type="string", example="http://catalogo-produtos.local/products"),
+ *                 @OA\Property(property="per_page", type="integer", example=10),
+ *                 @OA\Property(property="to", type="integer", example=20),
+ *                 @OA\Property(property="total", type="integer", example=200)
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=500,
+ *         description="Erro interno ao retornar a lista de produtos",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Erro interno")
+ *         )
+ *     )
+ * )
+ */
+public function index(ProductListRequest $request, Product $product): JsonResponse
     {
         try {
-            $page = request('page', 1);
-            $perPage = request('per_page', 10);
-            $sort = request('sort', 'id');
-            $direction = request('direction', 'asc');
+            $page = $request->input('page', 1);
+            $perPage = $request->input('per_page', 10);
+            $sort = $request->input('sort', 'id');
+            $direction = $request->input('direction', 'asc');
 
-            $products = $product::orderBy($sort, $direction)->paginate($perPage, ['*'], 'page', $page);
+            $productsQuery = $product::orderBy($sort, $direction);
+
+            if ($name = $request->input('name')) {
+                $productsQuery->where('name', 'like', '%' . $name . '%');
+            }
+
+            $products = $productsQuery->paginate($perPage, ['*'], 'page', $page);
+
+            $products->getCollection()->transform(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'description' => $product->description,
+                    'stock' => $product->stock,
+                    'created_at' => $product->created_at,
+                    'updated_at' => $product->updated_at,
+                    'links' => [
+                        [
+                            'rel' => 'self',
+                            'href' => route('products.show', ['product' => $product->id])
+                        ],
+                        [
+                            'rel' => 'update',
+                            'href' => route('products.update', ['product' => $product->id])
+                        ],
+                        [
+                            'rel' => 'delete',
+                            'href' => route('products.destroy', ['product' => $product->id])
+                        ]
+                    ]
+                ];
+            });
+
             return response()->json($products);
         } catch (\Exception $e) {
+            Log::error('Erro ao retornar a lista de produtos: ' . $e->getMessage());
             return response()->json(['message' => 'Erro interno'], 500);
         }
     }
