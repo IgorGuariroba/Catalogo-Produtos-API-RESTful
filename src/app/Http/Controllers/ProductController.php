@@ -79,10 +79,19 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function index(): JsonResponse
+    public function index(Product $product): JsonResponse
     {
-        $products = Product::all();
-        return response()->json($products);
+        try {
+            $page = request('page', 1);
+            $perPage = request('per_page', 10);
+            $sort = request('sort', 'id');
+            $direction = request('direction', 'asc');
+
+            $products = $product::orderBy($sort, $direction)->paginate($perPage, ['*'], 'page', $page);
+            return response()->json($products);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro interno'], 500);
+        }
     }
 
     /**
