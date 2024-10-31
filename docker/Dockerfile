@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
 # Instalar extensões PHP necessárias para Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl
 
+# Instalar e habilitar a extensão Redis
+RUN pecl install redis && docker-php-ext-enable redis
+
 # Composer - Instalar Composer diretamente
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

@@ -54,3 +54,4 @@ docker/volumes/db_data/
 # Ignorar arquivos de log e cache
 storage/logs/
 storage/framework/cache/
+src/public/vendor/
