@@ -1,33 +1,222 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Catalogo de Produtos",
+        "title": "Catálogo de Produtos",
+        "description": "Este projeto tem como objetivo desenvolver uma aplicação de catálogo de produtos que seja simples e eficiente...",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Igor Guariroba",
+            "url": "www.igorguariroba.com.br",
+            "email": "1g0r.guari@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "0.1"
     },
     "servers": [
+        {
+            "url": "http://catalogo-produtos.local/api"
+        },
         {
             "url": "/api"
         }
     ],
     "paths": {
-        "/api/products": {
+        "/status": {
+            "get": {
+                "tags": [
+                    "Serviços"
+                ],
+                "summary": "Consultar status dos serviços",
+                "description": "Este endpoint verifica o status de conexão dos principais serviços da aplicação: banco de dados, cache e fila.",
+                "operationId": "cd244898462c55d26ed81ba9be6ad784",
+                "responses": {
+                    "200": {
+                        "description": "Status dos serviços",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "description": "Status geral da aplicação",
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "services": {
+                                            "properties": {
+                                                "database": {
+                                                    "description": "Status da conexão com o banco de dados",
+                                                    "type": "string",
+                                                    "example": "Connected"
+                                                },
+                                                "cache": {
+                                                    "description": "Status da conexão com o serviço de cache",
+                                                    "type": "string",
+                                                    "example": "Connected"
+                                                },
+                                                "queue": {
+                                                    "description": "Status da conexão com o serviço de filas",
+                                                    "type": "string",
+                                                    "example": "Connected"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno no servidor"
+                    }
+                }
+            }
+        },
+        "/products": {
             "get": {
                 "tags": [
                     "Products"
                 ],
-                "summary": "Retorna a lista de produtos",
-                "description": "Retorna todos os produtos disponíveis no sistema",
+                "summary": "Lista os produtos",
+                "description": "Lista os produtos disponíveis, com suporte a paginação, ordenação, direção de ordenação e links HATEOAS para cada produto.",
                 "operationId": "getProducts",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página para paginação",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Número de itens por página para paginação",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Campo pelo qual os produtos devem ser ordenados",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "id"
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Direção da ordenação: asc para ascendente e desc para descendente",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Lista de produtos retornada com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Product"
-                                    }
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Product"
+                                            }
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://catalogo-produtos.local/products?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://catalogo-produtos.local/products?page=10"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": "http://catalogo-produtos.local/products?page=1",
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://catalogo-produtos.local/products?page=3",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "path": {
+                                                    "type": "string",
+                                                    "example": "http://catalogo-produtos.local/products"
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erro interno ao retornar a lista de produtos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro interno"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -68,7 +257,7 @@
                 }
             }
         },
-        "/api/products/{id}": {
+        "/products/{id}": {
             "get": {
                 "tags": [
                     "Products"
@@ -227,6 +416,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Serviços",
+            "description": "API Endpoints para Verificação de Status dos Serviços"
+        },
         {
             "name": "Products",
             "description": "API Endpoints para Gerenciamento de Produtos"
