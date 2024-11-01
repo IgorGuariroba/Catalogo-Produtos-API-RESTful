@@ -61,11 +61,11 @@ class ProductController extends Controller
         }
     }
 
-    public function update(ProductUpdateRequest $request, Product $id): JsonResponse
+    public function update(ProductUpdateRequest $request, Product $product): JsonResponse
     {
         try {
-            $id->update($request->all());
-            return response()->json($this->transformProduct($id));
+            $product->update($request->all());
+            return response()->json($this->transformProduct($product));
         } catch (\Exception $e) {
             Log::error('Erro ao atualizar o produto: ' . $e->getMessage());
             return response()->json(['message' => 'Erro interno'], 500);
@@ -76,7 +76,7 @@ class ProductController extends Controller
     {
         try {
             $id->delete();
-            return response()->json(['message' => 'Produto deletado com sucesso'], 204);
+            return response()->json(null, 204);
         } catch (\Exception $e) {
             Log::error('Erro ao deletar o produto: ' . $e->getMessage());
             return response()->json(['message' => 'Erro interno'], 500);
