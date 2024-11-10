@@ -9,6 +9,7 @@
         "darkaonline/l5-swagger": "^8.6",
         "doctrine/annotations": "^2.0",
         "laravel/framework": "^11.9",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "sentry/sentry-laravel": "^4.9"
     },
@@ -19,6 +20,7 @@
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
         "laravel/telescope": "^5.2",
+        "lucascudo/laravel-pt-br-localization": "^3.0",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
         "pestphp/pest": "^3.5",

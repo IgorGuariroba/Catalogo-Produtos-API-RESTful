@@ -32,6 +32,7 @@ class ProductControllerAnnotations
      *      path="/products",
      *      operationId="getProducts",
      *      tags={"Products"},
+     *      security={{"bearerAuth":{}}},
      *      summary="Lista os produtos",
      *      description="Lista os produtos disponíveis, com suporte a paginação, ordenação, direção de ordenação e links HATEOAS para cada produto.",
      *      @OA\Parameter(
@@ -108,6 +109,7 @@ class ProductControllerAnnotations
      *      path="/products/{id}",
      *      operationId="getProductById",
      *      tags={"Products"},
+     *      security={{"bearerAuth":{}}},
      *      summary="Exibe um produto específico",
      *      description="Retorna um produto pelo ID",
      *      @OA\Parameter(
@@ -138,6 +140,7 @@ class ProductControllerAnnotations
      *      path="/products",
      *      operationId="createProduct",
      *      tags={"Products"},
+     *      security={{"bearerAuth":{}}},
      *      summary="Cria um novo produto",
      *      description="Cria um novo produto com os dados fornecidos",
      *      @OA\RequestBody(
@@ -165,6 +168,7 @@ class ProductControllerAnnotations
      *      path="/products/{id}",
      *      operationId="updateProduct",
      *      tags={"Products"},
+     *      security={{"bearerAuth":{}}},
      *      summary="Atualiza um produto existente",
      *      description="Atualiza os dados de um produto pelo ID",
      *      @OA\Parameter(
@@ -199,6 +203,7 @@ class ProductControllerAnnotations
      *      path="/products/{id}",
      *      operationId="deleteProduct",
      *      tags={"Products"},
+     *      security={{"bearerAuth":{}}},
      *      summary="Deleta um produto",
      *      description="Remove um produto pelo ID",
      *      @OA\Parameter(

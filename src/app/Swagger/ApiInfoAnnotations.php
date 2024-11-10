@@ -18,6 +18,7 @@ namespace App\Swagger;
  *     termsOfService="http://swagger.io/terms/",
  * )
  * @OA\Server(url="http://catalogo-produtos.local/api")
+ *
  */
 class ApiInfoAnnotations
 {
