@@ -24,7 +24,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = auth()->login($user);
+        $token = $user->createToken($request->email,['server:update'])->plainTextToken;
 
         return $this->respondWithToken($token);
     }
@@ -36,20 +36,23 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = $request->only(['email', 'password']);
-        $key = 'login-attempts:' . $request->ip();
-
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            return response()->json(['error' => 'Too many login attempts. Please try again later.'], 429);
+        if (RateLimiter::tooManyAttempts($request->ip(), 5)) {
+            return response()->json([
+                'message' => 'Too many login attempts. Please try again later.'
+            ], 429);
         }
 
-        if (!$token = auth()->attempt($credentials)) {
-            RateLimiter::hit($key, 60);
-            return response()->json(['error' => 'Invalid credentials'], 401);
+        if (!auth()->attempt($request->only('email', 'password'))) {
+            RateLimiter::hit($request->ip());
+            return response()->json([
+                'message' => 'Invalid login details'
+            ], 401);
         }
 
-        RateLimiter::clear($key);
-        return $this->respondWithToken($token);
+        RateLimiter::clear($request->ip());
+
+        $token = auth()->user()->createToken($request->email,['server:update'])->plainTextToken;
+        return $this->respondWithToken($token, auth()->user());
     }
 
     public function me(): JsonResponse
